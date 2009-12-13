@@ -8,7 +8,7 @@
 
 Planned usage:
 
-var db = new LeatherCouch.Database('http://localhost:8954');
+var db = new LeatherCouch.Database('http://localhost:8954/posts');
 var id = db.save({"title": "Hello World", "body": "Hello, World"});
 var rows = db.design('posts', '_view/all'); // Synchronous
 db.design('posts', '_view/all', nil, function(rows) { }); // Asynchronous
@@ -23,28 +23,46 @@ LeatherCouch.Database = new Class({
     this.url = url;
   },
 
-  get: function(id) {
-    // return document or null
+  get: function(id, callback) {
+    return new Request.JSON({
+                 url: this.url_for('/' + id),
+                 onSuccess: function(json, text) {
+                              if(json['ok'] == 'true') {
+                                callback(json);
+                              } else {
+                                callback(null);
+                              }
+                            }
+               }).get();
   },
 
-  save: function(doc) {
+  save: function(doc, callback) {
     // save existing doc or create new one
     // return id/rev
+    id = doc._id;
+    method = $.chk(id) ? 'PUT' : 'POST'
+    return new Request.JSON({
+                 url: this.url_for('/' + id),
+                 onSuccess: function(json, text) {
+                              if(json['ok'] == 'true') {
+                                callback(json);
+                              } else {
+                                callback(null);
+                              }
+                            }
+                 }).send({ 'method': method }); 
   },
 
   design: function(name) {
     // return design document at /_design/[name]
-  }
-});
-
-LeatherCouch.Document = new Class({
-  initialize: function(id) {
-    
+    return new LeatherCouch.DesignDocument(this.url_for('/_design/' + name));
   }
 });
 
 LeatherCouch.DesignDocument = new Class({
-  extends: [ LeatherCouch.Document ],
+  initialize: function(url) {
+    this.url = url;
+  },
 
   view: function(name) {
   },
