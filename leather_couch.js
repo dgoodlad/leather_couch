@@ -9,8 +9,13 @@
 Planned usage:
 
 var db = new LeatherCouch.Database('http://localhost:8954/posts');
-var id = db.save({"_id": "hello-world", "title": "Hello World", "body": "Hello, World"});
-db.get('hello-world', function(doc) { console.log(doc); });
+var id, rev;
+db.save({"_id": "hello-world", "title": "Hello World", "body": "Hello, World"},
+        function(response) {
+          id = response.id;
+          rev = response.rev;
+        }});
+db.get(id, function(doc) { console.log(doc); });
 db.design('posts', '_view/all', nil, function(rows) { }); // Asynchronous
 db.design('posts', '_view/all', {startkey: "2009-12-15", endkey: "2009-12-18"}, function(row) { });
 
@@ -41,11 +46,7 @@ LeatherCouch.Database = new Class({
                     url: this._url_for('/' + id),
                     data: JSON.encode(doc),
                     onSuccess: function(json, text) {
-                                 if(json['ok'] == 'true') {
-                                   callback(json);
-                                 } else {
-                                   callback(null);
-                                 }
+                                 callback(json);
                                }
                    });
     req.send({ 'method': method }); 
