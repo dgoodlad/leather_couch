@@ -8,6 +8,6 @@ _in other words_: JavaScript CouchDB interface using mootools
 
 It doesn't work yet. Patience, young one.
 
-== Copyright
+# Copyright
 
 Copyright (c) 2009 David Goodlad. See LICENSE for details.
