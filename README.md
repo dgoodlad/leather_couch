@@ -6,7 +6,10 @@ _in other words_: JavaScript CouchDB interface using mootools
 
 ## Basic Usage
 
-It doesn't work yet. Patience, young one.
+It goes.
+
+  var db = new LeatherCouch.Database('http://localhost:5984/posts');
+  db.get('hello-world', function(doc) { console.log(json) });
 
 # Copyright
 

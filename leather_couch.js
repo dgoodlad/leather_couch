@@ -9,7 +9,8 @@
 Planned usage:
 
 var db = new LeatherCouch.Database('http://localhost:8954/posts');
-var id = db.save({"title": "Hello World", "body": "Hello, World"});
+var id = db.save({"_id": "hello-world", "title": "Hello World", "body": "Hello, World"});
+db.get('hello-world', function(doc) { console.log(doc); });
 db.design('posts', '_view/all', nil, function(rows) { }); // Asynchronous
 db.design('posts', '_view/all', {startkey: "2009-12-15", endkey: "2009-12-18"}, function(row) { });
 
