@@ -24,31 +24,45 @@ db.design('posts', '_view/all', {startkey: "2009-12-15", endkey: "2009-12-18"}, 
 LeatherCouch = new Object();
 
 LeatherCouch.Database = new Class({
-  initialize: function(url) {
+  Implements: Options,
+  options: {
+    jsonp: true
+  },
+
+  initialize: function(url, options) {
     this.url = url;
+    this.setOptions(options);
+  },
+
+  request: function(options) {
+    reqclass = this.options.jsonp ? Request.JSONP : Request.JSON;
+    return new reqclass(options);
   },
 
   get: function(id, callback) {
-    var req = new Request.JSON({
-                    url: this._url_for('/' + id),
-                    onSuccess: function(json, text) {
-                                 callback(json);
-                               }
-                  });
-    req.get();
+    var req = this.request({
+                url: this._url_for('/' + id),
+                method: 'get',
+                onSuccess: function(json, text) {
+                             callback(json);
+                           }
+              });
+    req.send();
     return req;
   },
 
   save: function(doc, callback) {
     id = doc._id;
-    method = $.chk(id) ? 'PUT' : 'POST'
-    var req = new Request.JSON({
-                    url: this._url_for('/' + id),
-                    data: JSON.encode(doc),
-                    onSuccess: function(json, text) {
-                                 callback(json);
-                               }
-                   });
+    //method = $chk(id) ? 'PUT' : 'POST'
+    method = 'put';
+    var req = this.request({
+                url: this._url_for('/' + id),
+                emulation: false, /* TODO Does this make IE break? */
+                data: JSON.encode(doc),
+                onSuccess: function(json, text) {
+                             callback(json);
+                           }
+              });
     req.send({ 'method': method }); 
     return req;
   },
@@ -56,15 +70,16 @@ LeatherCouch.Database = new Class({
   design: function(name, path, options, callback) {
     // TODO don't use Request.JSON, since shows, lists, etc might not be
     // giving json back. This is just temporary to play with views only
-    options = $.chk(options) ? options : {}
-    var req = new Request.JSON({
-                    url: this._url_for('/_design/' + name + '/' + path),
-                    data: options,
-                    onSuccess: function(json, text) {
-                                 callback(json);
-                               }
-                  });
-    req.get();
+    options = $chk(options) ? options : {}
+    var req = this.request({
+                url: this._url_for('/_design/' + name + '/' + path),
+                data: options,
+                method: 'get',
+                onSuccess: function(json, text) {
+                             callback(json);
+                           }
+              });
+    req.send();
     return req;
   },
 
@@ -72,3 +87,21 @@ LeatherCouch.Database = new Class({
     return this.url + path;
   }
 });
+
+LeatherCouch.Doc = {
+  asCouchDoc: function() {
+    doc = {}
+    this.couchAttributes.extend(['_id', '_rev']).each(function(attribute) {
+      doc[attribute] = this[attribute];
+    });
+    return doc;
+  }
+}
+
+LeatherCouch.Doc = function(db, view) {
+  return {
+    get: function(key) {
+      
+    }
+  };
+}
